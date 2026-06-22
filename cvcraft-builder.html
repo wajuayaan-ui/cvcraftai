@@ -740,7 +740,7 @@ async function generate() {
   document.getElementById('status').innerHTML = '<span class="spin"></span>&nbsp; AI is composing your CV…';
 
   try {
-    const res = await fetch('/api/claude', {
+    const res = await fetch('https://cvcraftai.wajuayaan.workers.dev/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model:'gemini-2.5-flash', max_tokens:2500, stream:true, messages:[{ role:'user', content:buildPrompt() }] })
