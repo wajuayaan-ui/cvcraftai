@@ -452,21 +452,29 @@ updateChips();
 
 // ── Skill categories ──
 let skillCatN = 0;
+const SKILL_CAT_HINTS = [
+  { cat: 'e.g. Programming Languages', val: 'Python, JavaScript, SQL, C++' },
+  { cat: 'e.g. Tools & Frameworks',    val: 'React, Node.js, Docker, Git' },
+  { cat: 'e.g. Cloud & DevOps',        val: 'AWS, Azure, Linux, CI/CD' },
+  { cat: 'e.g. Databases',             val: 'MySQL, PostgreSQL, MongoDB, Firebase' },
+  { cat: 'e.g. Soft / Other',          val: 'Project Management, Agile, Technical Writing' },
+];
 function addSkillCat(cat='', val='') {
   skillCatN++;
   const id = skillCatN;
+  const hint = SKILL_CAT_HINTS[(id - 1) % SKILL_CAT_HINTS.length];
   const wrap = document.createElement('div');
   wrap.id = 'skcat-' + id;
   wrap.className = 'rep-row';
   wrap.innerHTML = `
     <div class="rep-head"><span class="rep-num">Category ${id}</span><button type="button" class="rep-rm" onclick="document.getElementById('skcat-${id}').remove()">Remove</button></div>
     <div class="skill-cat-row">
-      <input type="text" class="sk-cat" placeholder="e.g. Languages" value="${cat}">
-      <input type="text" class="sk-val" placeholder="Python, SQL, R, C++" value="${val}">
+      <input type="text" class="sk-cat" placeholder="${hint.cat}" value="${cat}">
+      <input type="text" class="sk-val" placeholder="${hint.val}" value="${val}">
     </div>`;
   document.getElementById('skill-cat-list').appendChild(wrap);
 }
-// default 5 skill categories
+// default 2 skill categories
 ['',''].forEach(() => addSkillCat('',''));
 
 // ── Jobs ──
@@ -657,8 +665,10 @@ function buildPrompt() {
 
 OUTPUT FORMAT RULES:
 - Output ONLY the CV body starting from SUMMARY section
-- Each section heading must be exactly as shown below, ALL CAPS
-- Under each heading write the content directly
+- CRITICAL: Section headings must appear EXACTLY as listed below — ALL CAPS, plain text, nothing else on that line (no **, no #, no colons, no dashes)
+- Do NOT use markdown formatting anywhere — no bold (**), no italics (*), no headers (#), no horizontal rules
+- Under each heading write the content directly on the next line
+- For SUMMARY: Write exactly 2-3 natural, humanized sentences. No more. Sound like a real person, not a robot. No bullet points.
 - For WORK EXPERIENCE: separate each job with a BLANK LINE. Format: "Job Title\nCompany, Location\nDates | Employment Type\n• bullet\n• bullet"
 - For PROJECTS: separate each project with a BLANK LINE. Format: "Project Name\nTools: ...\nDescription paragraph"
 - For EDUCATION: separate each qualification with a BLANK LINE. Format: "Degree / Qualification\nInstitution, Location\nDates"
@@ -787,9 +797,13 @@ async function generate() {
           if (chunk) {
             full += chunk;
             for (const l of chunk.split('\n')) {
-              let hit = false;
-              for (const k of SECTION_KEYS) { if (l.trim()===k) { currentEl=getSection(k); hit=true; break; } }
-              if (!hit && currentEl) currentEl.textContent += (currentEl.textContent ? '\n' : '') + l;
+              let s = l.trim();
+              s = s.replace(/^\*{1,3}/, '').replace(/\*{1,3}$/, '');
+              s = s.replace(/^#+\s*/, '');
+              s = s.replace(/^[-\u2500\u2014\u2022=\s]+/, '').replace(/[-\u2500\u2014\u2022=:]+$/, '').trim().toUpperCase();
+              const matchedKey = SECTION_KEYS.find(k => s === k);
+              if (matchedKey) { currentEl = getSection(matchedKey); }
+              else if (currentEl) { currentEl.textContent += (currentEl.textContent ? '\n' : '') + l; }
             }
           }
         } catch {}
@@ -802,11 +816,22 @@ async function generate() {
     const fullLines = full.split('\n');
     let currentKey = null;
     let currentLines = [];
+
+    function normaliseHeading(line) {
+      let s = line.trim();
+      s = s.replace(/^\*{1,3}/, '').replace(/\*{1,3}$/, '');
+      s = s.replace(/^#+\s*/, '');
+      s = s.replace(/^[-\u2500\u2014\u2022=\s]+/, '');
+      s = s.replace(/[-\u2500\u2014\u2022=:]+$/, '');
+      return s.trim().toUpperCase();
+    }
+
     for (const line of fullLines) {
-      const trimmed = line.trim();
-      if (SECTION_KEYS.includes(trimmed)) {
+      const normalised = normaliseHeading(line);
+      const matchedKey = SECTION_KEYS.find(k => normalised === k);
+      if (matchedKey) {
         if (currentKey) sections[currentKey] = currentLines.join('\n').trim();
-        currentKey = trimmed;
+        currentKey = matchedKey;
         currentLines = [];
       } else if (currentKey) {
         currentLines.push(line);
