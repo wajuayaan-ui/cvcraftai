@@ -177,8 +177,9 @@ textarea { resize:vertical; min-height:68px; line-height:1.55; }
 .cv-soft-col { display:table-cell; width:50%; color:var(--ink-soft); padding-right:6px; vertical-align:top; }
 .cv-job-block { margin-bottom:0; }
 .cv-line { display:block; }
-.cv-bullet { display:block; padding-left:16px; text-indent:-16px; text-align:left; color:var(--ink-soft); }
-.cv-bullet::marker { color: var(--indigo); }
+.cv-bullet { display:flex; align-items:flex-start; gap:7px; text-align:left; color:var(--ink-soft); margin-bottom:1px; }
+.cv-bullet-dot { flex-shrink:0; margin-top:6px; width:5px; height:5px; border-radius:50%; background:var(--indigo); display:inline-block; }
+.cv-bullet-text { flex:1; line-height:1.65; }
 .cv-achieve { display:block; padding-left:22px; text-indent:-22px; text-align:left; margin-bottom:4px; color:var(--ink-soft); }
 /* empty state handled by idle-scene */
 /* status */
@@ -914,14 +915,19 @@ OUTPUT FORMAT RULES:
 - Do NOT use markdown formatting anywhere — no bold (**), no italics (*), no headers (#), no horizontal rules
 - Under each heading write the content directly on the next line
 - For SUMMARY: Write exactly 2-3 natural, humanized sentences. No more. Sound like a real person, not a robot. No bullet points.
-- For WORK EXPERIENCE: separate each job with a BLANK LINE. Format: "Job Title\nCompany, Location\nDates | Employment Type\n• bullet\n• bullet"
+- For WORK EXPERIENCE: separate each job with a BLANK LINE. Format strictly as:
+  Line 1: Job Title
+  Line 2: Company, Location
+  Line 3: Dates | Employment Type
+  Then each bullet point on its OWN separate line starting with •
+  Each bullet must be a SINGLE line — never wrap or merge two bullets into one line. No paragraph descriptions.
 - For PROJECTS: separate each project with a BLANK LINE. Format: "Project Name\nTools: ...\nDescription paragraph"
 - For EDUCATION: separate each qualification with a BLANK LINE. Format: "Degree / Qualification\nInstitution, Location\nDates"
 - For CERTIFICATIONS: one per line "Name — Issuer (Date)"
 - For ACHIEVEMENTS: numbered list, one per line "1. Title: description"
 - For LANGUAGES: one per line "Language (Level)"
 - For SOFT SKILLS: comma-separated on ONE line
-- For SKILLS: list each category as "Category Name: skill1, skill2, skill3"
+- For SKILLS: Output ONLY the skill categories the user has provided below. Do NOT invent new category names. For each user-provided category, list only the skills the user entered for that category, plus any chip-selected skills that logically belong to that category. Omit any category that has no skills. Format each as "Category Name: skill1, skill2, skill3" — one category per line, no bullets, no extra text.
 - If PROJECTS is empty, omit that section entirely
 - Use strong action verbs, quantify where possible
 - Make it ATS-friendly (no tables, no columns, clean text)
@@ -1378,7 +1384,9 @@ body{font-family:'Source Serif 4',serif;font-size:11.5px;color:#1C1B19;line-heig
 .cv-soft-col{display:table-cell;width:50%;color:#374151;padding-right:6px;vertical-align:top;}
 .cv-job-block{margin-bottom:0;}
 .cv-line{display:block;}
-.cv-bullet{display:block;padding-left:16px;text-indent:-16px;text-align:left;}
+.cv-bullet{display:flex;align-items:flex-start;gap:7px;text-align:left;margin-bottom:1px;}
+.cv-bullet-dot{flex-shrink:0;margin-top:5px;width:4px;height:4px;border-radius:50%;background:#1C1B19;display:inline-block;}
+.cv-bullet-text{flex:1;line-height:1.65;}
 .cv-achieve{display:block;padding-left:22px;text-indent:-22px;text-align:justify;margin-bottom:3px;}
 @media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}header,footer,thead{display:none!important;}}
 </style></head><body>
