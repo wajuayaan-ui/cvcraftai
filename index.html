@@ -40,6 +40,7 @@
   --theme-btn-hover: #E7E5F5;
   --or-badge-bg: #fff;
   --modal-cancel-bg: #F2F1FA;
+  /* nav vars live in nav.js */
   --glow-indigo: rgba(108,92,231,0.18);
   --glow-emerald: rgba(16,185,129,0.15);
   --particle-color: rgba(108,92,231,0.35);
@@ -174,94 +175,7 @@ h1,h2,h3,.brand-name{ font-family:'Lexend','Inter',sans-serif; }
 a{ text-decoration:none; color:inherit; }
 button{ font-family:inherit; }
 
-/* ─── NAV ─── */
-.nav {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:18px 48px;
-  border-bottom:1px solid var(--line);
-  background:var(--nav-bg);
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-  position:sticky; top:0; z-index:200;
-  animation:fadeDown .6s cubic-bezier(.16,.8,.3,1) both;
-  transition:background .4s, border-color .4s;
-}
-.brand{ display:flex; align-items:center; cursor:pointer; }
-.brand-logo{ height:42px; width:auto; display:block; transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .2s; }
-.brand:hover .brand-logo{ transform:scale(1.04); opacity:.9; }
-body.dark .brand-logo{ filter:invert(1) brightness(2); }
-
-.nav-links{ display:flex; align-items:center; gap:34px; }
-.nav-links a{
-  font-size:14.5px; font-weight:500; color:var(--ink-soft);
-  position:relative; padding-bottom:6px;
-  transition:color .2s;
-}
-.nav-links a::after{
-  content:''; position:absolute; left:0; right:100%; bottom:-2px;
-  height:2px; background:var(--indigo); border-radius:2px;
-  transition:right .28s cubic-bezier(.16,.8,.3,1);
-}
-.nav-links a:hover{ color:var(--ink); }
-.nav-links a:hover::after{ right:0; }
-.nav-links a.active{ color:var(--indigo); font-weight:600; }
-.nav-links a.active::after{ right:0; }
-
-.nav-right{ display:flex; align-items:center; gap:12px; }
-
-/* Theme toggle — pill switch style */
-.theme-pill{
-  width:56px; height:30px; border-radius:999px;
-  background:var(--theme-btn-bg);
-  border:1.5px solid var(--line);
-  position:relative; cursor:pointer;
-  transition:background .35s, border-color .35s;
-  flex-shrink:0;
-}
-.theme-pill-knob{
-  position:absolute; top:3px; left:3px;
-  width:22px; height:22px; border-radius:50%;
-  background:linear-gradient(135deg,#fff,#f0eeff);
-  box-shadow:0 2px 8px rgba(0,0,0,.18);
-  display:flex; align-items:center; justify-content:center;
-  transition:transform .38s cubic-bezier(.34,1.56,.64,1), background .35s, box-shadow .3s;
-}
-body.dark .theme-pill{ background:#1E1C38; border-color:#2E2B4A; }
-body.dark .theme-pill-knob{
-  transform:translateX(26px);
-  background:linear-gradient(135deg,#6C5CE7,#5B4BD6);
-  box-shadow:0 2px 10px rgba(108,92,231,.5);
-}
-.theme-pill-knob svg{ transition:opacity .2s, transform .3s; }
-.sun-icon{ position:absolute; }
-.moon-icon{ position:absolute; opacity:0; transform:rotate(40deg) scale(.6); }
-body.dark .sun-icon{ opacity:0; transform:rotate(-40deg) scale(.6); }
-body.dark .moon-icon{ opacity:1; transform:rotate(0deg) scale(1); }
-
-.btn-login{
-  font-size:14px; font-weight:600; color:var(--ink);
-  padding:9px 18px; border-radius:9px; border:1px solid var(--btn-login-border);
-  background:var(--btn-login-bg); cursor:pointer;
-  transition:border-color .2s, background .2s, transform .15s, color .3s;
-}
-.btn-login:hover{ border-color:var(--indigo); background:var(--violet-soft); transform:translateY(-1px); }
-.btn-login:active{ transform:translateY(0); }
-
-.btn-signup{
-  font-size:14px; font-weight:600; color:#fff;
-  padding:10px 20px; border-radius:9px; border:none;
-  background:linear-gradient(135deg,#7C6CF0,var(--indigo-dark));
-  cursor:pointer; box-shadow:0 4px 14px rgba(108,92,231,.35);
-  transition:transform .15s, box-shadow .2s, filter .15s;
-  position:relative; overflow:hidden;
-}
-.btn-signup::after{
-  content:''; position:absolute; top:0; left:0; width:40%; height:100%;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);
-  transform:translateX(-130%) skewX(-12deg);
-}
-.btn-signup:hover{ filter:brightness(1.08); transform:translateY(-1px); box-shadow:0 8px 22px rgba(108,92,231,.45); }
-.btn-signup:hover::after{ animation:shine .7s ease forwards; }
-.btn-signup:active{ transform:translateY(0); }
+/* ─── NAV styles live in nav.js ─── */
 
 /* ─── HERO ─── */
 .hero{
@@ -607,69 +521,13 @@ body.dark .moon-icon{ opacity:1; transform:rotate(0deg) scale(1); }
 .modal-continue{ background:var(--indigo); color:#fff; }
 .modal-continue:hover{ background:var(--indigo-dark); }
 
-/* ─── DARK MODE background star particles ─── */
-.bg-stars{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-.bg-star{
-  position:absolute; border-radius:50%;
-  background:#fff; opacity:0;
-  animation:starPulse var(--dur,4s) ease-in-out infinite var(--del,0s);
-}
-body:not(.dark) .bg-star{ display:none; }
+/* ─── Dark mode star particles — in nav.js ─── */
 
-/* ─── HAMBURGER ─── */
-.hamburger{
-  display:none; flex-direction:column; justify-content:center; gap:5px;
-  width:38px; height:38px; border-radius:10px; border:1.5px solid var(--line);
-  background:var(--btn-login-bg); cursor:pointer; padding:8px;
-  transition:background .2s, border-color .2s; flex-shrink:0;
-}
-.hamburger span{
-  display:block; height:2px; border-radius:2px;
-  background:var(--ink); transition:transform .3s, opacity .3s;
-}
-.hamburger.open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
-.hamburger.open span:nth-child(2){ opacity:0; }
-.hamburger.open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
-
-/* ─── MOBILE DRAWER ─── */
-.mobile-drawer{
-  position:fixed; top:0; right:0; height:100%; width:280px; max-width:85vw;
-  background:var(--modal-bg); border-left:1px solid var(--line);
-  z-index:300; transform:translateX(100%);
-  transition:transform .35s cubic-bezier(.16,.8,.3,1), background .4s, border-color .4s;
-  display:flex; flex-direction:column;
-}
-.mobile-drawer.open{ transform:translateX(0); }
-.mobile-drawer-inner{
-  padding:80px 28px 32px;
-  display:flex; flex-direction:column; gap:4px; flex:1;
-}
-.mobile-drawer-inner a{
-  font-size:16px; font-weight:500; color:var(--ink-soft);
-  padding:13px 0; border-bottom:1px solid var(--line);
-  display:block; transition:color .2s;
-}
-.mobile-drawer-inner a.active{ color:var(--indigo); font-weight:600; }
-.mobile-drawer-inner a:hover{ color:var(--ink); }
-.mobile-drawer-btns{
-  margin-top:24px; display:flex; flex-direction:column; gap:10px;
-}
-.mobile-drawer-btns .btn-login,
-.mobile-drawer-btns .btn-signup{ width:100%; padding:12px 18px; font-size:15px; border-radius:10px; }
-
-.drawer-overlay{
-  position:fixed; inset:0; background:rgba(8,8,18,.5);
-  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
-  z-index:299; display:none; opacity:0;
-  transition:opacity .3s ease;
-}
-.drawer-overlay.show{ display:block; opacity:1; }
+/* ─── Hamburger / Drawer / Responsive nav — in nav.js ─── */
 
 /* ─── RESPONSIVE ─── */
 @media(max-width:980px){
-  .nav-links{ display:none; }
-  .hamburger{ display:flex; }
-  .btn-login, .btn-signup{ display:none; }
+  /* nav responsive handled by nav.js */
   .hero h1{ font-size:42px; }
   .choice-wrap{ grid-template-columns:1fr; gap:20px; }
   .or-badge{ display:none; }
@@ -721,61 +579,9 @@ body:not(.dark) .bg-star{ display:none; }
 </head>
 <body>
 
-<!-- dark-mode star field -->
-<div class="bg-stars" id="bgStars"></div>
-
-<!-- ─── NAV ─── -->
-<nav class="nav">
-  <div class="brand" onclick="location.href='index.html'" style="cursor:pointer;">
-    <img src="cvcraft-logo.png" alt="CvCraft.ai" class="brand-logo">
-  </div>
-
-  <div class="nav-links">
-    <a href="#" class="active">Home</a>
-    <a href="templates.html">Templates</a>
-  <!--  <a href="#">Examples</a> -->
-    <a href="pricing.html">Pricing</a>
-    <a href="about.html">About</a>
-  </div>
-
-  <!-- Hamburger (mobile only) -->
-  <button class="hamburger" id="hamburger" aria-label="Open menu">
-    <span></span><span></span><span></span>
-  </button>
-
-  <div class="nav-right">
-    <!-- Pill toggle -->
-    <button class="theme-pill" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark / light">
-      <div class="theme-pill-knob">
-        <svg class="sun-icon" width="13" height="13" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="4.5" stroke="#F59E0B" stroke-width="2"/>
-          <path d="M12 2v2.5M12 19.5V22M22 12h-2.5M4.5 12H2M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3l-1.8-1.8" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <svg class="moon-icon" width="13" height="13" viewBox="0 0 24 24" fill="none">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" fill="#A78BFA" stroke="#A78BFA" stroke-width="1.5" stroke-linejoin="round"/>
-        </svg>
-      </div>
-    </button>
-    <button class="btn-login">Log in</button>
-    <button class="btn-signup">Sign up</button>
-  </div>
-</nav>
-
-<!-- Mobile nav drawer -->
-<div class="mobile-drawer" id="mobile-drawer">
-  <div class="mobile-drawer-inner">
-    <a href="#" class="active">Home</a>
-    <a href="templates.html">Templates</a>
-   <!-- <a href="#">Examples</a> -->
-    <a href="pricing.html">Pricing</a>
-    <a href="about.html">About</a>
-    <div class="mobile-drawer-btns">
-      <button class="btn-login">Log in</button>
-      <button class="btn-signup">Sign up</button>
-    </div>
-  </div>
-</div>
-<div class="drawer-overlay" id="drawer-overlay"></div>
+<!-- ─── SHARED NAV ─── -->
+<div id="nav-root"></div>
+<script src="nav.js"></script>
 
 <!-- ─── HERO ─── -->
 <header class="hero">
@@ -912,68 +718,7 @@ body:not(.dark) .bg-star{ display:none; }
 </div>
 
 <script>
-/* ── Dark mode: PROPER toggle via body.dark class ── */
-const themeBtn = document.getElementById('theme-toggle');
-let isDark = localStorage.getItem('cvcraft-dark') === '1';
-
-function applyTheme(dark) {
-  document.body.classList.toggle('dark', dark);
-  localStorage.setItem('cvcraft-dark', dark ? '1' : '0');
-  // spawn/clear stars
-  renderStars(dark);
-}
-
-// Apply immediately (no flash on reload)
-applyTheme(isDark);
-
-themeBtn.addEventListener('click', () => {
-  isDark = !isDark;
-  applyTheme(isDark);
-});
-
-/* ── Star field for dark mode ── */
-function renderStars(dark) {
-  const container = document.getElementById('bgStars');
-  container.innerHTML = '';
-  if (!dark) return;
-  const count = 80;
-  for (let i = 0; i < count; i++) {
-    const s = document.createElement('div');
-    s.className = 'bg-star';
-    const size = Math.random() * 2.5 + 1;
-    s.style.cssText = [
-      `width:${size}px`, `height:${size}px`,
-      `left:${Math.random()*100}%`, `top:${Math.random()*100}%`,
-      `--dur:${(Math.random()*5+3).toFixed(1)}s`,
-      `--del:${(Math.random()*6).toFixed(1)}s`,
-      `opacity:${(Math.random()*.4+.05).toFixed(2)}`
-    ].join(';');
-    container.appendChild(s);
-  }
-}
-
-/* ── Hamburger / Mobile Drawer ── */
-const hamburger     = document.getElementById('hamburger');
-const mobileDrawer  = document.getElementById('mobile-drawer');
-const drawerOverlay = document.getElementById('drawer-overlay');
-
-function openDrawer() {
-  hamburger.classList.add('open');
-  mobileDrawer.classList.add('open');
-  drawerOverlay.classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawer() {
-  hamburger.classList.remove('open');
-  mobileDrawer.classList.remove('open');
-  drawerOverlay.classList.remove('show');
-  document.body.style.overflow = '';
-}
-hamburger.addEventListener('click', () => {
-  mobileDrawer.classList.contains('open') ? closeDrawer() : openDrawer();
-});
-drawerOverlay.addEventListener('click', closeDrawer);
-mobileDrawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
+/* ── Dark mode + hamburger handled by nav.js ── */
 
 /* ── Upload flow removed — Enhance card now links directly to cv-import.html ── */
 
