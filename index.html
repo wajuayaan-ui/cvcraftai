@@ -188,7 +188,7 @@ button{ font-family:inherit; }
 .brand{ display:flex; align-items:center; cursor:pointer; }
 .brand-logo{ height:42px; width:auto; display:block; transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .2s; }
 .brand:hover .brand-logo{ transform:scale(1.04); opacity:.9; }
-body.dark .brand-logo{ filter:brightness(1.15); }
+body.dark .brand-logo{ filter:invert(1) brightness(2); }
 
 .nav-links{ display:flex; align-items:center; gap:34px; }
 .nav-links a{
@@ -806,20 +806,19 @@ body:not(.dark) .bg-star{ display:none; }
   <div class="choice-wrap">
     <div class="or-badge">or</div>
 
-    <!-- Upload CV -->
+    <!-- Enhance CV -->
     <div class="choice-card violet">
       <div class="card-blob"></div>
       <div class="choice-icon violet">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke="#6C5CE7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16" stroke="#6C5CE7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" stroke="#6C5CE7" stroke-width="2" stroke-linejoin="round"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" stroke="#6C5CE7" stroke-width="1.6" stroke-linejoin="round"/><path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z" stroke="#6C5CE7" stroke-width="1.4" stroke-linejoin="round"/></svg>
       </div>
-      <h3>Upload Your CV</h3>
-      <p class="desc">Upload your existing CV and we'll help you enhance it with AI-powered suggestions.</p>
-      <button class="choice-btn violet" id="upload-trigger">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Upload CV
-      </button>
-      <input type="file" id="cv-file-input" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt">
-      <p class="choice-foot">Supports PDF, DOCX, TXT · Max 5 MB</p>
+      <h3>Enhance Your CV</h3>
+      <p class="desc">Enhance your existing CV using AI — get smart suggestions, better phrasing, and a polished result in minutes.</p>
+      <a href="cv-import.html" class="choice-btn violet">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Enhance with AI
+      </a>
+      <p class="choice-foot">AI-powered · Instant suggestions</p>
     </div>
 
     <!-- Create CV -->
@@ -976,30 +975,7 @@ hamburger.addEventListener('click', () => {
 drawerOverlay.addEventListener('click', closeDrawer);
 mobileDrawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
 
-/* ── Upload flow ── */
-const uploadTrigger = document.getElementById('upload-trigger');
-const fileInput     = document.getElementById('cv-file-input');
-const modal         = document.getElementById('upload-modal');
-const modalFilename = document.getElementById('modal-filename');
-const modalCancel   = document.getElementById('modal-cancel');
-const modalContinue = document.getElementById('modal-continue');
-
-uploadTrigger.addEventListener('click', () => fileInput.click());
-
-fileInput.addEventListener('change', () => {
-  if (!fileInput.files || !fileInput.files[0]) return;
-  const file = fileInput.files[0];
-  if (file.size > 5 * 1024 * 1024) {
-    alert('File is larger than 5 MB. Please choose a smaller PDF, DOCX, or TXT file.');
-    fileInput.value = '';
-    return;
-  }
-  modalFilename.textContent = file.name;
-  modal.classList.add('show');
-});
-modalCancel.addEventListener('click', () => { modal.classList.remove('show'); fileInput.value = ''; });
-modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
-modalContinue.addEventListener('click', () => { window.location.href = 'cv-import.html'; });
+/* ── Upload flow removed — Enhance card now links directly to cv-import.html ── */
 
 /* ── Scroll-reveal + count-up ── */
 const prefersReduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
