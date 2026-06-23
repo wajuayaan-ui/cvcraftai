@@ -768,11 +768,27 @@ async function generate() {
         const d = line.slice(6); if (d==='[DONE]') continue;
         try {
           const p = JSON.parse(d);
-          if (p.type==='content_block_delta' && p.delta?.text) {
-            full += p.delta.text;
-            for (const l of p.delta.text.split('\n')) {
+
+          // Extract text chunk — supports both Anthropic and Gemini SSE formats
+          let chunk = '';
+          // Anthropic format: { type: 'content_block_delta', delta: { text: '...' } }
+          if (p.type === 'content_block_delta' && p.delta?.text) {
+            chunk = p.delta.text;
+          }
+          // Gemini format: { candidates: [{ content: { parts: [{ text: '...' }] } }] }
+          else if (p.candidates?.[0]?.content?.parts?.[0]?.text) {
+            chunk = p.candidates[0].content.parts[0].text;
+          }
+          // OpenAI-compatible format (some workers): { choices: [{ delta: { content: '...' } }] }
+          else if (p.choices?.[0]?.delta?.content) {
+            chunk = p.choices[0].delta.content;
+          }
+
+          if (chunk) {
+            full += chunk;
+            for (const l of chunk.split('\n')) {
               let hit = false;
-              for (const k of SECTION_KEYS) { if (l.trim()===k || l.trim().startsWith(k+'\n')) { currentEl=getSection(k); hit=true; break; } }
+              for (const k of SECTION_KEYS) { if (l.trim()===k) { currentEl=getSection(k); hit=true; break; } }
               if (!hit && currentEl) currentEl.textContent += (currentEl.textContent ? '\n' : '') + l;
             }
           }
@@ -781,9 +797,22 @@ async function generate() {
     }
 
     // clean final render
+    // Parse sections by scanning line by line — avoids regex lookahead issues
     const sections = {};
-    const rx = new RegExp('(' + SECTION_KEYS.join('|') + ')([\\s\\S]*?)(?=' + SECTION_KEYS.join('|') + '|$)', 'g');
-    let m; while ((m = rx.exec(full)) !== null) sections[m[1]] = m[2].trim();
+    const fullLines = full.split('\n');
+    let currentKey = null;
+    let currentLines = [];
+    for (const line of fullLines) {
+      const trimmed = line.trim();
+      if (SECTION_KEYS.includes(trimmed)) {
+        if (currentKey) sections[currentKey] = currentLines.join('\n').trim();
+        currentKey = trimmed;
+        currentLines = [];
+      } else if (currentKey) {
+        currentLines.push(line);
+      }
+    }
+    if (currentKey) sections[currentKey] = currentLines.join('\n').trim();
     window.__cvSections = sections;
     body.innerHTML = '';
     for (const k of SECTION_KEYS) if (sections[k]) {
