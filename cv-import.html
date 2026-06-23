@@ -649,9 +649,9 @@ ${rawText}
   } catch (err) {
     clearInterval(stepTimer);
     showError(
-      'AI parsing failed',
+      'Early Testing Phase',
       err.message.includes('fetch') || err.message.includes('Network')
-        ? 'Could not reach the AI service. Make sure your proxy server is running.'
+        ? 'The system Currently in the testing phase and are continuously improving our text extraction capabilities. If your PDF is image-based (scanned), text extraction may not work yet.'
         : err.message.slice(0, 180)
     );
   }
