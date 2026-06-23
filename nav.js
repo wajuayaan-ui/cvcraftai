@@ -358,4 +358,7 @@ body:not(.dark) .cc-bg-star{ display:none; }
   overlay.addEventListener('click', closeDrawer);
   drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
 
+  /* ── Reveal body now that nav is injected — prevents old-nav flash ── */
+  document.body.style.visibility = 'visible';
+
 })();
