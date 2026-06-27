@@ -949,12 +949,100 @@ function markFilled(id) {
   if (hasValue && badge.textContent === 'Required') badge.textContent = '✓ Done';
   else if (!hasValue && badge.textContent === '✓ Done') badge.textContent = 'Required';
 }
+// ── Populate builder from CV import ──
+function populateFromImport(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+  // Personal details
+  set('fname',       d.fname);
+  set('lname',       d.lname);
+  set('target-role', d.targetRole);
+  set('phone',       d.phone);
+  set('email',       d.email);
+  set('city',        d.city);
+  set('linkedin',    d.linkedin);
+  set('github',      d.github);
+  set('dob',         d.dob);
+  set('nationality', d.nationality);
+
+  // Achievements & soft skills
+  set('achievements', d.achievements);
+  set('softskills',   d.softSkills);
+
+  // Skill categories — clear defaults first, then fill
+  const skList = document.getElementById('skill-cat-list');
+  if (skList && d.skillCategories && d.skillCategories.length) {
+    skList.innerHTML = ''; skillCatN = 0;
+    d.skillCategories.forEach(sc => addSkillCat(sc.cat || '', sc.val || ''));
+  }
+
+  // Jobs — clear default blank, then fill
+  const jobList = document.getElementById('job-list');
+  if (jobList && d.jobs && d.jobs.length) {
+    jobList.innerHTML = ''; jobN = 0;
+    d.jobs.forEach(j => addJob(j.title||'', j.company||'', j.location||'', j.dates||'', j.type||'', j.notes||''));
+  }
+
+  // Projects — clear default blank, then fill
+  const projList = document.getElementById('project-list');
+  if (projList && d.projects && d.projects.length) {
+    projList.innerHTML = ''; projN = 0;
+    d.projects.forEach(p => addProject(p.name||'', p.tools||'', p.desc||''));
+  }
+
+  // Education — clear default blank, then fill
+  const eduList = document.getElementById('edu-list');
+  if (eduList && d.education && d.education.length) {
+    eduList.innerHTML = ''; eduN = 0;
+    d.education.forEach(e => addEdu(e.degree||'', e.institution||'', e.location||'', e.dates||''));
+  }
+
+  // Certifications — clear default blank, then fill
+  const certList = document.getElementById('cert-list');
+  if (certList && d.certifications && d.certifications.length) {
+    certList.innerHTML = ''; certN = 0;
+    d.certifications.forEach(c => addCert(c.name||'', c.issuer||'', c.date||''));
+  }
+
+  // Languages — clear defaults, then fill
+  const langList = document.getElementById('lang-list');
+  if (langList && d.languages && d.languages.length) {
+    langList.innerHTML = ''; langN = 0;
+    d.languages.forEach(l => addLang(l.lang||'', l.level||''));
+  }
+
+  // Show a toast banner so user knows data was loaded
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#10B981;color:#fff;font-size:13.5px;font-weight:600;padding:11px 22px;border-radius:12px;box-shadow:0 6px 20px rgba(16,185,129,.4);z-index:9999;animation:fadeDown .4s ease both';
+  toast.textContent = '✓ CV imported — all fields pre-filled!';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+
+  // Trigger progress update
+  updateProgress();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.acc-section').forEach(sec => {
     sec.querySelectorAll('input,textarea,select').forEach(inp => {
       inp.addEventListener('input', () => markFilled(sec.id));
     });
   });
+
+  // ── Read imported CV data from sessionStorage ──
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('source') === 'import') {
+    try {
+      const raw = sessionStorage.getItem('cvcraft-import');
+      if (raw) {
+        const data = JSON.parse(raw);
+        populateFromImport(data);
+        sessionStorage.removeItem('cvcraft-import'); // clean up after use
+      }
+    } catch (e) {
+      console.warn('CV import data could not be read:', e);
+    }
+  }
 });
 
 // ── Generation animation ──
