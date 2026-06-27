@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>body{visibility:hidden}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CvCraft — Job Matches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --indigo: #6C5CE7; --indigo-dark: #5B4BD6; --indigo-deep: #4F3FC9;
+  --violet-soft: #EDE9FE; --panel-violet: #F4F2FD;
+  --emerald: #10B981; --emerald-dark: #0EA371; --emerald-soft: #D7F5EA; --panel-emerald: #F0FBF6;
+  --ink: #1A1B2E; --ink-soft: #5B5D72; --ink-faint: #8A8CA0;
+  --line: #E7E6F0; --line-soft: #F0EFF8;
+  --paper: #FCFCFE; --card: #FFFFFF;
+  --red: #E0436B;
+  --shadow-card: 0 1px 2px rgba(26,27,46,0.04), 0 12px 28px -10px rgba(26,27,46,0.12), 0 2px 8px rgba(26,27,46,0.05);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+h1, h2, h3 { font-family: 'Lexend', 'Inter', sans-serif; }
+a { text-decoration: none; color: inherit; }
+
+@keyframes fadeUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes popIn    { from{opacity:0;transform:scale(0.96) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes spin     { to{transform:rotate(360deg)} }
+@keyframes shimmer  { 0%{background-position:200% center} 100%{background-position:-200% center} }
+
+/* ── Masthead (matches builder exactly) ── */
+.masthead {
+  height: 60px; background: var(--card); border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 var(--line);
+}
+.masthead-logo-link { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: var(--ink-soft);
+  padding: 8px 14px; border-radius: 9px; border: 1.5px solid var(--line);
+  background: #fff; cursor: pointer; transition: all 0.15s;
+  text-decoration: none;
+}
+.back-btn:hover { border-color: #C9C0F2; background: var(--violet-soft); color: var(--indigo-deep); }
+
+/* ── Page layout ── */
+.page { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; animation: fadeUp 0.5s cubic-bezier(.16,.8,.3,1) both 0.05s; }
+
+/* ── Page header ── */
+.page-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--indigo-deep); background: var(--violet-soft);
+  padding: 4px 13px; border-radius: 999px; margin-bottom: 14px;
+  border: 1px solid rgba(108,92,231,.15);
+}
+.page-title {
+  font-size: 30px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.2; margin-bottom: 6px;
+}
+.page-title .accent {
+  background: linear-gradient(90deg,#6C5CE7,#9D8FFF,#6C5CE7);
+  background-size: 300% auto; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; animation: shimmer 5s linear infinite;
+}
+.page-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 32px; }
+
+/* ── Search controls ── */
+.search-bar {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 16px;
+  padding: 16px 18px; margin-bottom: 28px; box-shadow: var(--shadow-card);
+}
+.search-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+.search-label { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); }
+.search-input {
+  border: 1.5px solid var(--line); border-radius: 9px; padding: 9px 12px;
+  font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink);
+  background: var(--paper); outline: none; transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.search-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(108,92,231,.12); background: #fff; }
+.search-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 10px; border: none;
+  background: linear-gradient(135deg,#7C6CF0,var(--indigo-dark)); color: #fff;
+  font-size: 13.5px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 6px 18px -6px rgba(108,92,231,.5);
+  transition: transform .15s, filter .15s, box-shadow .2s;
+  white-space: nowrap; align-self: flex-end;
+}
+.search-btn:hover { transform: translateY(-2px); filter: brightness(1.07); box-shadow: 0 10px 24px -6px rgba(108,92,231,.55); }
+.search-btn:active { transform: translateY(0); }
+
+/* ── Platform filters ── */
+.filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-label { font-size: 12px; font-weight: 600; color: var(--ink-soft); margin-right: 4px; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600; padding: 5px 13px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; color: var(--ink-soft);
+  cursor: pointer; transition: all .15s;
+}
+.filter-chip.on { border-color: var(--indigo); background: var(--violet-soft); color: var(--indigo-deep); }
+.filter-chip .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+.dot-linkedin { background: #0A66C2; }
+.dot-indeed   { background: #E8820C; }
+.dot-google   { background: #1A73E8; }
+
+/* ── Results header ── */
+.results-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.results-count { font-size: 13px; color: var(--ink-soft); }
+.results-count strong { color: var(--ink); }
+.refresh-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 600; padding: 7px 14px;
+  border-radius: 9px; border: 1.5px solid var(--line); background: #fff;
+  color: var(--ink-soft); cursor: pointer; transition: all .15s;
+}
+.refresh-btn:hover { border-color: #C9C0F2; background: var(--violet-soft); color: var(--indigo-deep); }
+
+/* ── Job cards ── */
+.jobs-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.job-card {
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 16px;
+  padding: 18px 20px; transition: border-color .2s, box-shadow .2s, transform .15s;
+  animation: popIn .35s cubic-bezier(.16,.8,.3,1) both;
+  position: relative; overflow: hidden;
+}
+.job-card:hover { border-color: #D7D2F5; box-shadow: 0 8px 24px -8px rgba(108,92,231,.18); transform: translateY(-2px); }
+.job-card-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.job-info { flex: 1; min-width: 0; }
+.job-role { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 3px; letter-spacing: -.2px; }
+.job-meta { font-size: 12.5px; color: var(--ink-soft); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.job-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-faint); }
+.job-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.job-tag {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+}
+.job-tag.skill { border-color: #D7D2F5; background: var(--violet-soft); color: var(--indigo-deep); }
+
+/* ── Apply buttons ── */
+.apply-links { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.apply-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 9px;
+  border: 1.5px solid; text-decoration: none; transition: all .15s;
+}
+.apply-btn:hover { transform: translateY(-1px); }
+.apply-btn.linkedin { color: #0A66C2; border-color: #C8D9F5; background: #F0F5FF; }
+.apply-btn.linkedin:hover { background: #DDE8FF; }
+.apply-btn.indeed { color: #E8820C; border-color: #FFD9A8; background: #FFF8F0; }
+.apply-btn.indeed:hover { background: #FFEEDC; }
+.apply-btn.google { color: #1A73E8; border-color: #AECBFA; background: #F0F7FF; }
+.apply-btn.google:hover { background: #DDF0FF; }
+
+/* ── Browse all banner ── */
+.browse-all {
+  margin-top: 24px; background: var(--violet-soft); border: 1.5px solid #D7D2F5;
+  border-radius: 16px; padding: 20px 22px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.browse-all-text { font-size: 13.5px; font-weight: 700; color: var(--indigo-deep); margin-bottom: 3px; }
+.browse-all-sub { font-size: 12px; color: var(--ink-soft); }
+.browse-links { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Loading state ── */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; gap: 14px; text-align: center;
+}
+.loading-spinner {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid var(--line); border-top-color: var(--indigo);
+  animation: spin .75s linear infinite;
+}
+.loading-text { font-size: 14px; font-weight: 600; color: var(--ink); }
+.loading-sub { font-size: 12.5px; color: var(--ink-soft); }
+
+/* ── Empty / no-data state ── */
+.no-data {
+  text-align: center; padding: 60px 20px;
+}
+.no-data-icon { font-size: 40px; margin-bottom: 14px; }
+.no-data-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.no-data-sub { font-size: 13px; color: var(--ink-soft); max-width: 320px; margin: 0 auto 20px; line-height: 1.6; }
+
+/* ── Future sections placeholder ── */
+.future-section {
+  margin-top: 48px; padding-top: 32px; border-top: 1.5px solid var(--line);
+}
+.future-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 16px;
+}
+.future-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.future-card {
+  background: var(--card); border: 1.5px dashed var(--line); border-radius: 14px;
+  padding: 18px; text-align: center; color: var(--ink-faint);
+  font-size: 13px; font-weight: 500;
+}
+.future-card .future-icon { font-size: 24px; margin-bottom: 8px; }
+.future-card .future-label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); margin-bottom: 3px; }
+.future-card .future-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 999px; background: var(--amber-soft, #FEF1DA); color: #B45309;
+  letter-spacing: .04em; text-transform: uppercase; margin-top: 6px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .page { padding: 28px 14px 60px; }
+  .page-title { font-size: 22px; }
+  .search-bar { flex-direction: column; }
+  .job-card-inner { flex-direction: column; }
+  .browse-all { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Masthead — matches builder -->
+<div class="masthead">
+  <a href="index.html" class="masthead-logo-link">
+    <img src="cvcraft-logo.png" alt="CVCraft" style="height:38px;width:auto;object-fit:contain;display:block;"
+         id="logo-img" onerror="document.getElementById('logo-img').style.display='none';document.getElementById('logo-text').style.display='flex';">
+    <div id="logo-text" style="display:none;flex-direction:column;line-height:1;gap:1px;">
+      <div style="font-size:21px;font-weight:800;letter-spacing:-0.6px;font-family:'Lexend',sans-serif;">
+        <span style="color:var(--indigo);">CV</span><span style="color:var(--ink);">Craft</span>
+      </div>
+      <div style="font-size:8.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-faint);">Craft your future</div>
+    </div>
+  </a>
+  <a href="cvcraft-builder.html" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Builder
+  </a>
+</div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-eyebrow">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 3h5v5M10 14L21 3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Matched to your CV
+  </div>
+  <h1 class="page-title">Find your next <span class="accent">opportunity</span></h1>
+  <p class="page-sub" id="page-sub">Showing jobs matched to your role and skills — click any platform to apply directly.</p>
+
+  <!-- Search bar -->
+  <div class="search-bar">
+    <div class="search-field">
+      <label class="search-label">Job title / Role</label>
+      <input class="search-input" type="text" id="input-role" placeholder="e.g. Data Analyst">
+    </div>
+    <div class="search-field">
+      <label class="search-label">Location</label>
+      <input class="search-input" type="text" id="input-city" placeholder="e.g. Riyadh, Saudi Arabia">
+    </div>
+    <div class="search-field">
+      <label class="search-label">Key skills</label>
+      <input class="search-input" type="text" id="input-skills" placeholder="e.g. Python, SQL, Excel">
+    </div>
+    <button class="search-btn" onclick="renderJobs()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search
+    </button>
+  </div>
+
+  <!-- Platform filters -->
+  <div class="filter-row">
+    <span class="filter-label">Platforms:</span>
+    <button class="filter-chip on" id="chip-linkedin" onclick="toggleChip('linkedin')">
+      <span class="chip-dot dot-linkedin"></span> LinkedIn
+    </button>
+    <button class="filter-chip on" id="chip-indeed" onclick="toggleChip('indeed')">
+      <span class="chip-dot dot-indeed"></span> Indeed
+    </button>
+    <button class="filter-chip on" id="chip-google" onclick="toggleChip('google')">
+      <span class="chip-dot dot-google"></span> Google Jobs
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="results-header" class="results-header" style="display:none;">
+    <div class="results-count" id="results-count"></div>
+    <button class="refresh-btn" onclick="renderJobs()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div id="jobs-container"></div>
+
+  <!-- Browse all banner -->
+  <div class="browse-all" id="browse-all" style="display:none;">
+    <div>
+      <div class="browse-all-text">🔍 See all results for "<span id="browse-role"></span>"</div>
+      <div class="browse-all-sub">Open the full search on your preferred platform</div>
+    </div>
+    <div class="browse-links" id="browse-links"></div>
+  </div>
+
+  <!-- Future sections -->
+  <div class="future-section">
+    <div class="future-section-title">Coming soon</div>
+    <div class="future-cards">
+      <div class="future-card">
+        <div class="future-icon">📧</div>
+        <div class="future-label">Cold Email Generator</div>
+        <div style="font-size:11.5px;color:var(--ink-faint);line-height:1.5;">AI-written outreach emails for any job listing</div>
+        <span class="future-badge">Soon</span>
+      </div>
+      <div class="future-card">
+        <div class="future-icon">📊</div>
+        <div class="future-label">Salary Insights</div>
+        <div style="font-size:11.5px;color:var(--ink-faint);line-height:1.5;">Market salary ranges for your role and location</div>
+        <span class="future-badge">Soon</span>
+      </div>
+      <div class="future-card">
+        <div class="future-icon">🎯</div>
+        <div class="future-label">ATS Score per Job</div>
+        <div style="font-size:11.5px;color:var(--ink-faint);line-height:1.5;">See how well your CV matches each job description</div>
+        <span class="future-badge">Soon</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.body.style.visibility = 'visible';
+
+// ── Platform filter state ──
+const platforms = { linkedin: true, indeed: true, google: true };
+
+function toggleChip(p) {
+  platforms[p] = !platforms[p];
+  document.getElementById('chip-' + p).classList.toggle('on', platforms[p]);
+  renderJobs();
+}
+
+// ── Role variants ──
+function generateRoleVariants(role, skills) {
+  const r = role.trim();
+  const variants = new Set([r]);
+  ['Senior', 'Junior', 'Lead', 'Associate'].forEach(l => {
+    if (!r.toLowerCase().includes(l.toLowerCase())) variants.add(l + ' ' + r);
+  });
+  variants.add(r + ' Remote');
+  if (skills) {
+    const firstSkill = skills.split(',')[0].trim();
+    if (firstSkill && firstSkill.length < 20) variants.add(r + ' ' + firstSkill);
+  }
+  return [...variants].slice(0, 8);
+}
+
+// ── Render ──
+function renderJobs() {
+  const role   = document.getElementById('input-role').value.trim();
+  const city   = document.getElementById('input-city').value.trim();
+  const skills = document.getElementById('input-skills').value.trim();
+
+  if (!role) {
+    document.getElementById('jobs-container').innerHTML = `
+      <div class="no-data">
+        <div class="no-data-icon">🔍</div>
+        <div class="no-data-title">Enter a job title to search</div>
+        <div class="no-data-sub">Type your target role above and hit Search to see matching jobs on LinkedIn, Indeed and Google Jobs.</div>
+      </div>`;
+    document.getElementById('results-header').style.display = 'none';
+    document.getElementById('browse-all').style.display = 'none';
+    return;
+  }
+
+  // Show loading
+  document.getElementById('jobs-container').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Finding your matches…</div>
+      <div class="loading-sub">Building job search links for ${escHtml(role)}${city ? ' in ' + escHtml(city) : ''}</div>
+    </div>`;
+  document.getElementById('results-header').style.display = 'none';
+  document.getElementById('browse-all').style.display = 'none';
+
+  // Small delay for UX feel
+  setTimeout(() => buildCards(role, city, skills), 650);
+}
+
+function buildCards(role, city, skills) {
+  const variants = generateRoleVariants(role, skills);
+  const skillList = skills ? skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const container = document.getElementById('jobs-container');
+  container.innerHTML = '';
+
+  const activePlatforms = Object.keys(platforms).filter(p => platforms[p]);
+  if (!activePlatforms.length) {
+    container.innerHTML = `<div class="no-data"><div class="no-data-icon">⚠️</div><div class="no-data-title">Select at least one platform</div></div>`;
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'jobs-grid';
+
+  variants.forEach((variant, i) => {
+    const q  = encodeURIComponent(variant + (city ? ' ' + city : ''));
+    const lc = encodeURIComponent(city || '');
+    const gq = encodeURIComponent(variant + (city ? ' jobs in ' + city : ' jobs'));
+
+    const links = {
+      linkedin: `https://www.linkedin.com/jobs/search/?keywords=${q}&location=${lc}&f_TPR=r604800`,
+      indeed:   `https://www.indeed.com/jobs?q=${encodeURIComponent(variant)}&l=${lc}`,
+      google:   `https://www.google.com/search?q=${gq}&ibp=htl;jobs`,
+    };
+
+    // Pick 2-3 matching skill tags
+    const tagSkills = skillList.slice(0, 3);
+
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.style.animationDelay = (i * 0.05) + 's';
+
+    const applyBtns = activePlatforms.map(p => {
+      const icons = {
+        linkedin: `<svg width="13" height="13" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>`,
+        indeed:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="#E8820C"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+        google:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>`,
+      };
+      const labels = { linkedin: 'LinkedIn', indeed: 'Indeed', google: 'Google Jobs' };
+      return `<a class="apply-btn ${p}" href="${links[p]}" target="_blank" rel="noopener">${icons[p]} Apply on ${labels[p]}</a>`;
+    }).join('');
+
+    const skillTags = tagSkills.map(s => `<span class="job-tag skill">${escHtml(s)}</span>`).join('');
+    const typeTags  = i === 0 ? `<span class="job-tag">Full-time</span><span class="job-tag">On-site</span>` : 
+                      i === variants.length - 1 ? `<span class="job-tag">Remote</span>` :
+                      `<span class="job-tag">Full-time</span>`;
+
+    card.innerHTML = `
+      <div class="job-card-inner">
+        <div class="job-info">
+          <div class="job-role">${escHtml(variant)}</div>
+          <div class="job-meta">
+            ${city ? `<span>${escHtml(city)}</span><span class="job-meta-dot"></span>` : ''}
+            <span>Multiple openings</span>
+          </div>
+          <div class="job-tags">
+            ${typeTags}
+            ${skillTags}
+          </div>
+        </div>
+      </div>
+      <div class="apply-links">${applyBtns}</div>`;
+
+    grid.appendChild(card);
+  });
+
+  container.appendChild(grid);
+
+  // Results count
+  document.getElementById('results-header').style.display = 'flex';
+  document.getElementById('results-count').innerHTML = `Showing <strong>${variants.length} role variants</strong> for <strong>${escHtml(role)}</strong>${city ? ' in ' + escHtml(city) : ''}`;
+
+  // Browse all banner
+  const browseAll = document.getElementById('browse-all');
+  browseAll.style.display = 'flex';
+  document.getElementById('browse-role').textContent = role;
+
+  const q  = encodeURIComponent(role + (city ? ' ' + city : ''));
+  const lc = encodeURIComponent(city || '');
+  const gq = encodeURIComponent(role + (city ? ' jobs in ' + city : ' jobs'));
+
+  document.getElementById('browse-links').innerHTML = `
+    <a class="apply-btn linkedin" href="https://www.linkedin.com/jobs/search/?keywords=${q}&location=${lc}" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="#0A66C2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+      All on LinkedIn
+    </a>
+    <a class="apply-btn indeed" href="https://www.indeed.com/jobs?q=${q}&l=${lc}" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="#E8820C"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      All on Indeed
+    </a>
+    <a class="apply-btn google" href="https://www.google.com/search?q=${gq}&ibp=htl;jobs" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      All on Google Jobs
+    </a>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── On load: read sessionStorage from builder ──
+window.addEventListener('DOMContentLoaded', () => {
+  let role = '', city = '', skills = '', name = '';
+
+  try {
+    const raw = sessionStorage.getItem('cvcraft-jobs');
+    if (raw) {
+      const d = JSON.parse(raw);
+      role   = d.role   || '';
+      city   = d.city   || '';
+      skills = d.skills || '';
+      name   = d.name   || '';
+      sessionStorage.removeItem('cvcraft-jobs');
+    }
+  } catch(e) {}
+
+  // Pre-fill inputs
+  document.getElementById('input-role').value   = role;
+  document.getElementById('input-city').value   = city;
+  document.getElementById('input-skills').value = skills;
+
+  // Update subtitle
+  if (name || role) {
+    const who = name ? name + (role ? ' · ' + role : '') : role;
+    document.getElementById('page-sub').textContent = `Matched to your profile: ${who}. Adjust the search above or click any platform to apply.`;
+  }
+
+  // Auto-render if we got data from builder
+  if (role) {
+    renderJobs();
+  } else {
+    document.getElementById('jobs-container').innerHTML = `
+      <div class="no-data">
+        <div class="no-data-icon">💼</div>
+        <div class="no-data-title">Enter your target role to get started</div>
+        <div class="no-data-sub">Type a job title above and hit Search — or go back to the builder and generate your CV first for auto-filled results.</div>
+        <a href="cvcraft-builder.html" class="back-btn" style="margin:0 auto;display:inline-flex;">← Back to Builder</a>
+      </div>`;
+  }
+});
+</script>
+</body>
+</html>
