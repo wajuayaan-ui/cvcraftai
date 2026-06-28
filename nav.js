@@ -330,6 +330,7 @@ body:not(.dark) .cc-bg-star{ display:none; }
     { href: 'templates.html', label: 'Templates' },
     { href: 'pricing.html',   label: 'Pricing' },
     { href: 'about.html',     label: 'About' },
+    { href: 'profile.html',     label: 'profile' },
   ];
 
   const linkHTML = links.map(l =>
