@@ -380,7 +380,7 @@ body:not(.dark) .cc-bg-star{ display:none; }
       <!-- filled by auth.js -->
       <div class="cc-user-menu" id="cc-user-menu">
         <div class="cc-user-menu-name" id="cc-user-name"></div>
-        <a href="cvcraft-builder.html">📄 My CVs</a>
+        <a href="profile.html">👤 My Profile</a>
         <button class="cc-user-menu-btn danger" id="cc-logout-btn">↩ Log out</button>
       </div>
     </div>
