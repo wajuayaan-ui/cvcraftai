@@ -1081,6 +1081,12 @@ function stopGenAnimation() {
 }
 
 // ── GENERATE ──
+  // Restore CV loaded from profile page
+const loadedCV = sessionStorage.getItem('cc-load-cv');
+if (loadedCV && location.search.includes('source=profile')) {
+  sessionStorage.removeItem('cc-load-cv');
+  // restoreFormData is built next
+}
 async function generate() {
   const fname = document.getElementById('fname').value.trim();
   if (!fname) { setStatus('Please enter your name first.', 'err'); return; }
