@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — CvCraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* prevent flash */
+body { visibility: hidden; }
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<script src="nav.js"></script>
+<script src="auth.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --indigo: #6C5CE7; --indigo-dark: #5B4BD6; --indigo-deep: #4F3FC9;
+  --violet-soft: #EDE9FE; --panel-violet: #F4F2FD;
+  --emerald: #10B981; --emerald-dark: #0EA371; --emerald-soft: #D7F5EA;
+  --ink: #1A1B2E; --ink-soft: #5B5D72; --ink-faint: #8A8CA0;
+  --line: #E7E6F0; --line-soft: #F0EFF8;
+  --paper: #FCFCFE; --card: #FFFFFF;
+  --red: #E0436B; --red-pale: #FDE3E8;
+  --amber: #F59E0B; --amber-soft: #FEF1DA;
+  --shadow-sm: 0 1px 3px rgba(26,27,46,0.06), 0 4px 12px -4px rgba(26,27,46,0.10);
+  --shadow-md: 0 4px 8px rgba(26,27,46,0.04), 0 16px 32px -12px rgba(108,92,231,0.16);
+}
+body.dark {
+  --ink: #E8E6F4; --ink-soft: #9A98B4; --ink-faint: #6A6880;
+  --line: #1E1C35; --line-soft: #16152A;
+  --paper: #0D0C1A; --card: #141327;
+  --violet-soft: #1E1B36; --panel-violet: #181630;
+  --emerald-soft: #0A2A1E;
+  --red-pale: #2A0F18;
+  --amber-soft: #2A1F08;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper); color: var(--ink);
+  font-size: 14px; line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Page layout ── */
+.page-wrap {
+  max-width: 900px; margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* ── Profile header card ── */
+.profile-hero {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 20px; padding: 32px;
+  display: flex; align-items: center; gap: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.profile-hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--indigo), #8B7CF6, var(--emerald));
+}
+.profile-avatar {
+  width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #7C6CF0, #5B4BD6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: #fff;
+  font-family: 'Lexend', sans-serif;
+  border: 3px solid var(--violet-soft);
+  box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+  overflow: hidden;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name {
+  font-family: 'Lexend', sans-serif;
+  font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.profile-email {
+  font-size: 13.5px; color: var(--ink-soft); margin-bottom: 10px;
+}
+.profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.profile-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+  padding: 4px 12px; border-radius: 999px;
+  text-transform: uppercase;
+}
+.badge-free {
+  background: var(--violet-soft); color: var(--indigo-deep);
+  border: 1.5px solid #C9C0F2;
+}
+.badge-provider {
+  background: var(--line-soft); color: var(--ink-soft);
+  border: 1.5px solid var(--line);
+}
+.profile-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.btn-logout {
+  font-size: 13px; font-weight: 600; padding: 9px 16px;
+  border-radius: 9px; border: 1.5px solid var(--line);
+  background: var(--paper); color: var(--red);
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-logout:hover { background: var(--red-pale); border-color: var(--red); }
+
+/* ── Stats row ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 14px; padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Lexend', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--indigo), #8B7CF6);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat-label {
+  font-size: 12px; font-weight: 600; color: var(--ink-faint);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px;
+}
+
+/* ── Section header ── */
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sec-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px; font-weight: 700; letter-spacing: -0.2px;
+}
+.btn-new-cv {
+  font-size: 13px; font-weight: 600; padding: 9px 18px;
+  border-radius: 9px; border: none;
+  background: linear-gradient(135deg, #7C6CF0, var(--indigo-dark));
+  color: #fff; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(108,92,231,0.35);
+  transition: all 0.15s; display: flex; align-items: center; gap: 7px;
+}
+.btn-new-cv:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ── CV cards grid ── */
+.cv-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.cv-card {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 16px; padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative; overflow: hidden;
+}
+.cv-card:hover {
+  border-color: #C9C0F2;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.cv-card-accent {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--indigo), #8B7CF6);
+  border-radius: 16px 16px 0 0;
+}
+.cv-card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--panel-violet); border: 1.5px solid #D7D2F5;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.cv-card-name {
+  font-weight: 700; font-size: 14.5px; letter-spacing: -0.2px;
+  color: var(--ink); margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cv-card-date {
+  font-size: 11.5px; color: var(--ink-faint);
+}
+.cv-card-actions {
+  display: flex; gap: 8px; margin-top: auto;
+}
+.cv-action-btn {
+  flex: 1; font-size: 12px; font-weight: 600;
+  padding: 8px 10px; border-radius: 8px;
+  border: 1.5px solid var(--line); background: var(--paper);
+  color: var(--ink-soft); cursor: pointer;
+  transition: all 0.15s; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.cv-action-btn:hover { border-color: #C9C0F2; color: var(--indigo); background: var(--violet-soft); }
+.cv-action-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-pale); }
+.cv-action-btn.primary {
+  background: linear-gradient(135deg, #7C6CF0, var(--indigo-dark));
+  border-color: transparent; color: #fff;
+  box-shadow: 0 3px 10px rgba(108,92,231,0.3);
+}
+.cv-action-btn.primary:hover { filter: brightness(1.08); color: #fff; }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center; padding: 60px 24px;
+  background: var(--card); border: 1.5px dashed var(--line);
+  border-radius: 16px;
+}
+.empty-icon { font-size: 48px; margin-bottom: 14px; }
+.empty-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 17px; font-weight: 700; margin-bottom: 6px;
+}
+.empty-sub { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 20px; }
+.btn-start {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; padding: 12px 24px;
+  border-radius: 10px; border: none;
+  background: linear-gradient(135deg, #7C6CF0, var(--indigo-dark));
+  color: #fff; cursor: pointer; text-decoration: none;
+  box-shadow: 0 6px 18px rgba(108,92,231,0.35);
+  transition: all 0.15s;
+}
+.btn-start:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+/* ── Loading skeleton ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--line-soft) 25%, var(--line) 50%, var(--line-soft) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.skeleton-card {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 16px; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+/* ── Auth gate ── */
+.auth-gate {
+  text-align: center; padding: 80px 24px;
+}
+.auth-gate-icon { font-size: 56px; margin-bottom: 20px; }
+.auth-gate-title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 22px; font-weight: 700; margin-bottom: 8px;
+}
+.auth-gate-sub { font-size: 14px; color: var(--ink-soft); margin-bottom: 24px; }
+
+/* ── Toast ── */
+.cc-toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--ink); color: #fff;
+  padding: 12px 20px; border-radius: 12px;
+  font-size: 13.5px; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 1000; display: none;
+  animation: toastIn 0.3s cubic-bezier(.16,.8,.3,1);
+  max-width: 320px;
+}
+.cc-toast.show { display: flex; align-items: center; gap: 10px; }
+.cc-toast.ok  { background: #0EA371; }
+.cc-toast.err { background: var(--red); }
+@keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Delete confirm modal ── */
+.del-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(8,8,18,0.6); backdrop-filter: blur(6px);
+  z-index: 600; align-items: center; justify-content: center;
+}
+.del-modal.open { display: flex; }
+.del-box {
+  background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 18px; padding: 32px 28px; width: 90%; max-width: 360px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.del-box h3 { font-family: 'Lexend', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.del-box p  { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 22px; }
+.del-box-btns { display: flex; gap: 10px; }
+.btn-cancel {
+  flex: 1; padding: 11px; border-radius: 9px;
+  border: 1.5px solid var(--line); background: var(--paper);
+  color: var(--ink-soft); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--indigo); color: var(--indigo); }
+.btn-confirm-del {
+  flex: 1; padding: 11px; border-radius: 9px;
+  border: none; background: var(--red);
+  color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-confirm-del:hover { filter: brightness(1.1); }
+
+@media (max-width: 600px) {
+  .profile-hero { flex-direction: column; text-align: center; }
+  .profile-badges { justify-content: center; }
+  .profile-actions { width: 100%; }
+  .btn-logout { flex: 1; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .stats-row .stat-card:last-child { grid-column: span 2; }
+}
+</style>
+
+<!-- Page content -->
+<div class="page-wrap">
+
+  <!-- Auth gate (shown before login) -->
+  <div id="auth-gate" class="auth-gate" style="display:none;">
+    <div class="auth-gate-icon">🔐</div>
+    <div class="auth-gate-title">Sign in to view your profile</div>
+    <div class="auth-gate-sub">Your saved CVs and account details live here.</div>
+    <button class="btn-start" onclick="document.querySelector('.cc-btn-signup')?.click()">
+      Get started free
+    </button>
+  </div>
+
+  <!-- Profile content (shown after login) -->
+  <div id="profile-content" style="display:none;">
+
+    <!-- Hero -->
+    <div class="profile-hero">
+      <div class="profile-avatar" id="p-avatar"></div>
+      <div class="profile-info">
+        <div class="profile-name" id="p-name">—</div>
+        <div class="profile-email" id="p-email">—</div>
+        <div class="profile-badges">
+          <span class="profile-badge badge-free">Free plan</span>
+          <span class="profile-badge badge-provider" id="p-provider"></span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-logout" onclick="doLogout()">↩ Log out</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-cvs">—</div>
+        <div class="stat-label">CVs saved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-updated">—</div>
+        <div class="stat-label">Last updated</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">∞</div>
+        <div class="stat-label">AI generations</div>
+      </div>
+    </div>
+
+    <!-- Saved CVs -->
+    <div class="sec-head">
+      <div class="sec-title">My CVs</div>
+      <a href="cvcraft-builder.html" class="btn-new-cv">
+        ✦ New CV
+      </a>
+    </div>
+
+    <div id="cv-list-wrap">
+      <!-- Loading skeletons -->
+      <div class="cv-grid" id="cv-skeleton">
+        ${[1,2,3].map(() => `
+          <div class="skeleton-card">
+            <div class="skeleton" style="width:40px;height:40px;border-radius:10px;"></div>
+            <div>
+              <div class="skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div>
+              <div class="skeleton" style="height:11px;width:45%;"></div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <div class="skeleton" style="height:34px;flex:1;border-radius:8px;"></div>
+              <div class="skeleton" style="height:34px;flex:1;border-radius:8px;"></div>
+              <div class="skeleton" style="height:34px;flex:1;border-radius:8px;"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="cv-grid" id="cv-grid" style="display:none;"></div>
+      <div class="empty-state" id="cv-empty" style="display:none;">
+        <div class="empty-icon">📄</div>
+        <div class="empty-title">No CVs yet</div>
+        <div class="empty-sub">Generate your first CV and it will be saved here automatically.</div>
+        <a href="cvcraft-builder.html" class="btn-start">✦ Build my CV</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div class="del-modal" id="del-modal">
+  <div class="del-box">
+    <h3>Delete this CV?</h3>
+    <p>This can't be undone. The CV will be permanently removed from your account.</p>
+    <div class="del-box-btns">
+      <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+      <button class="btn-confirm-del" id="del-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="cc-toast" id="cc-toast"></div>
+
+<script>
+// ── Wait for auth to be ready ──
+window.__onAuthReady = function(user) {
+  if (!user) {
+    document.getElementById('auth-gate').style.display = 'block';
+    document.getElementById('profile-content').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('auth-gate').style.display = 'none';
+  document.getElementById('profile-content').style.display = 'block';
+
+  // Fill profile hero
+  const name    = user.displayName || 'CvCraft User';
+  const email   = user.email || '';
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  const avatarEl = document.getElementById('p-avatar');
+  if (user.photoURL) {
+    avatarEl.innerHTML = `<img src="${user.photoURL}" alt="${initials}">`;
+  } else {
+    avatarEl.textContent = initials;
+  }
+
+  document.getElementById('p-name').textContent  = name;
+  document.getElementById('p-email').textContent = email;
+
+  const provider = user.providerData?.[0]?.providerId || '';
+  document.getElementById('p-provider').textContent =
+    provider === 'google.com' ? '🔵 Google account' :
+    provider === 'password'   ? '✉ Email account'  : provider;
+
+  // Load CVs
+  loadCVs();
+};
+
+// ── Load CVs from Worker ──
+async function loadCVs() {
+  try {
+    const cvs = await window.ccAuth.loadCVs();
+
+    document.getElementById('cv-skeleton').style.display = 'none';
+    document.getElementById('stat-cvs').textContent = cvs.length;
+
+    if (!cvs.length) {
+      document.getElementById('cv-empty').style.display = 'block';
+      document.getElementById('stat-updated').textContent = '—';
+      return;
+    }
+
+    // Most recent update
+    const latest = cvs[0]?.updated_at || '';
+    document.getElementById('stat-updated').textContent = latest
+      ? fmtDate(latest) : '—';
+
+    const grid = document.getElementById('cv-grid');
+    grid.style.display = 'grid';
+    grid.innerHTML = cvs.map(cv => cvCardHTML(cv)).join('');
+
+  } catch (e) {
+    document.getElementById('cv-skeleton').style.display = 'none';
+    showToast('Failed to load CVs. Please refresh.', 'err');
+  }
+}
+
+// ── CV card HTML ──
+function cvCardHTML(cv) {
+  const updated = fmtDate(cv.updated_at);
+  const created = fmtDate(cv.created_at);
+  return `
+    <div class="cv-card" id="card-${cv.id}">
+      <div class="cv-card-accent"></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="cv-card-icon">📄</div>
+        <div style="min-width:0;">
+          <div class="cv-card-name" title="${escHtml(cv.name)}">${escHtml(cv.name)}</div>
+          <div class="cv-card-date">Updated ${updated} · Created ${created}</div>
+        </div>
+      </div>
+      <div class="cv-card-actions">
+        <button class="cv-action-btn primary" onclick="editCV('${cv.id}')">
+          ✏ Edit
+        </button>
+        <button class="cv-action-btn" onclick="downloadCV('${cv.id}', '${escHtml(cv.name)}')">
+          ↓ Download
+        </button>
+        <button class="cv-action-btn danger" onclick="confirmDelete('${cv.id}', '${escHtml(cv.name)}')">
+          🗑
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ── Edit CV — load form data into builder ──
+async function editCV(cvId) {
+  try {
+    showToast('Loading CV…', '');
+    const cv = await window.ccAuth.loadCV(cvId);
+    if (!cv || !cv.form_data) { showToast('Could not load CV data.', 'err'); return; }
+
+    // Store in sessionStorage for builder to pick up
+    sessionStorage.setItem('cc-load-cv', cv.form_data);
+    sessionStorage.setItem('cc-load-cv-generated', cv.generated_text || '');
+    localStorage.setItem('cc-current-cv-id', cvId);
+
+    window.location.href = 'cvcraft-builder.html?source=profile';
+  } catch (e) {
+    showToast('Failed to load CV.', 'err');
+  }
+}
+
+// ── Download CV — load generated text into print window ──
+async function downloadCV(cvId, name) {
+  try {
+    showToast('Preparing download…', '');
+    const cv = await window.ccAuth.loadCV(cvId);
+    if (!cv || !cv.generated_text) {
+      showToast('No generated CV found. Please open and regenerate.', 'err');
+      return;
+    }
+
+    // Open a simple print window with the CV text
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head>
+      <meta charset="UTF-8">
+      <title>${escHtml(name)}</title>
+      <style>
+        body { font-family: 'Georgia', serif; font-size: 12px; line-height: 1.7;
+               color: #1C1B19; padding: 32px 40px; max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        pre { white-space: pre-wrap; font-family: inherit; font-size: 12px; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head><body>
+      <pre>${escHtml(cv.generated_text)}</pre>
+    </body></html>`);
+    win.document.close();
+    setTimeout(() => { win.focus(); win.print(); }, 300);
+    showToast('Print dialog opened — save as PDF.', 'ok');
+  } catch (e) {
+    showToast('Download failed.', 'err');
+  }
+}
+
+// ── Delete ──
+let _pendingDeleteId = null;
+
+function confirmDelete(cvId, name) {
+  _pendingDeleteId = cvId;
+  document.getElementById('del-modal').classList.add('open');
+  document.getElementById('del-confirm-btn').onclick = async () => {
+    closeDelModal();
+    try {
+      await window.ccAuth.deleteCV(_pendingDeleteId);
+      const card = document.getElementById('card-' + _pendingDeleteId);
+      if (card) card.remove();
+
+      // Update stat count
+      const remaining = document.querySelectorAll('.cv-card').length;
+      document.getElementById('stat-cvs').textContent = remaining;
+      if (remaining === 0) {
+        document.getElementById('cv-grid').style.display = 'none';
+        document.getElementById('cv-empty').style.display = 'block';
+        document.getElementById('stat-updated').textContent = '—';
+      }
+
+      showToast('CV deleted.', 'ok');
+    } catch (e) {
+      showToast('Delete failed. Try again.', 'err');
+    }
+  };
+}
+
+function closeDelModal() {
+  document.getElementById('del-modal').classList.remove('open');
+  _pendingDeleteId = null;
+}
+
+// ── Logout ──
+async function doLogout() {
+  await window.ccAuth.logout();
+  window.location.href = 'index.html';
+}
+
+// ── Helpers ──
+function fmtDate(str) {
+  if (!str) return '—';
+  try {
+    const d = new Date(str + (str.includes('Z') ? '' : 'Z'));
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60)   return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  } catch { return str; }
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Toast ──
+let _toastTimer;
+function showToast(msg, type) {
+  const el = document.getElementById('cc-toast');
+  el.textContent = type === 'ok' ? '✓  ' + msg : type === 'err' ? '✕  ' + msg : msg;
+  el.className = 'cc-toast show' + (type ? ' ' + type : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Close delete modal on outside click ──
+document.getElementById('del-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('del-modal')) closeDelModal();
+});
+</script>
+
+</body>
+</html>
