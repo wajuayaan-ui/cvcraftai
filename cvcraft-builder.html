@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lexend:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -1184,6 +1185,94 @@ async function generate() {
     document.getElementById('copy-btn').disabled = false;
     document.getElementById('dl-btn').disabled   = false;
     setStatus('CV generated — review the proof and download.', 'ok');
+    // ── Auto-save to account if logged in ──
+    if (window.__cvUser && window.ccAuth) {
+      try {
+        const cvName = (v('fname') + ' ' + v('lname')).trim() || 'My CV';
+        const cvId   = localStorage.getItem('cc-current-cv-id') || crypto.randomUUID();
+
+        // Capture all form data
+        const formSnapshot = {
+          fname:       v('fname'),       lname:    v('lname'),
+          phone:       v('phone'),       email:    v('email'),
+          city:        v('city'),        linkedin: v('linkedin'),
+          github:      v('github'),      dob:      v('dob'),
+          nationality: v('nationality'), iqama:    v('iqama'),
+          iqamaStatus: v('iqama-status'),
+          targetRole:  v('target-role'),
+          sector:      document.getElementById('sector')?.value || '',
+          achievements: v('achievements'),
+          softskills:   v('softskills'),
+          coursework:   v('coursework'),
+          otherTitle:   v('other-title'),
+          otherBody:    v('other-body'),
+
+          // Chip skills
+          chipSkills: [...document.querySelectorAll('.chip.on')].map(c => c.textContent),
+
+          // Skill categories
+          skillCats: [...document.querySelectorAll('#skill-cat-list .rep-row')].map(r => ({
+            cat: r.querySelector('.sk-cat')?.value || '',
+            val: r.querySelector('.sk-val')?.value || ''
+          })),
+
+          // Jobs
+          jobs: [...document.querySelectorAll('#job-list .rep-row')].map(r => ({
+            title:   r.querySelector('.j-title')?.value   || '',
+            company: r.querySelector('.j-company')?.value || '',
+            loc:     r.querySelector('.j-loc')?.value     || '',
+            dates:   r.querySelector('.j-dates')?.value   || '',
+            type:    r.querySelector('.j-type')?.value    || '',
+            notes:   r.querySelector('.j-notes')?.value   || ''
+          })),
+
+          // Projects
+          projects: [...document.querySelectorAll('#project-list .rep-row')].map(r => ({
+            name:  r.querySelector('.p-name')?.value  || '',
+            tools: r.querySelector('.p-tools')?.value || '',
+            desc:  r.querySelector('.p-desc')?.value  || ''
+          })),
+
+          // Education
+          edus: [...document.querySelectorAll('#edu-list .rep-row')].map(r => ({
+            deg:   r.querySelector('.e-deg')?.value   || '',
+            inst:  r.querySelector('.e-inst')?.value  || '',
+            loc:   r.querySelector('.e-loc')?.value   || '',
+            dates: r.querySelector('.e-dates')?.value || ''
+          })),
+
+          // Certs
+          certs: [...document.querySelectorAll('#cert-list .rep-row')].map(r => ({
+            name:   r.querySelector('.c-name')?.value   || '',
+            issuer: r.querySelector('.c-issuer')?.value || '',
+            date:   r.querySelector('.c-date')?.value   || ''
+          })),
+
+          // Languages
+          langs: [...document.querySelectorAll('#lang-list > div')].map(r => ({
+            lang:  r.querySelector('.l-lang')?.value  || '',
+            level: r.querySelector('.l-level')?.value || ''
+          })),
+
+          // Region
+          region: window.region || ''
+        };
+
+        const saved = await window.ccAuth.saveCV(
+          cvId,
+          cvName,
+          JSON.stringify(formSnapshot),
+          full  // the generated CV text
+        );
+
+        localStorage.setItem('cc-current-cv-id', saved.id);
+        setStatus('CV generated & saved to your account ✓', 'ok');
+
+      } catch (saveErr) {
+        console.warn('CV save failed (non-critical):', saveErr.message);
+        // Don't show error to user — save is background feature
+      }
+    }
 
   } catch (err) {
     body.innerHTML = `<div style="padding:24px;font-size:13px;color:var(--ink-soft);">
