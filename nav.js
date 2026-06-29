@@ -140,34 +140,17 @@ body.dark .cc-moon{ opacity:1; transform:rotate(0deg) scale(1); }
 .cc-btn-signup:hover{ filter:brightness(1.08); transform:translateY(-1px); }
 .cc-btn-signup:hover::after{ animation:_shine .7s ease forwards; }
 
-/* User avatar */
 .cc-user-avatar-wrap{
   position:relative; display:none; align-items:center;
+  cursor:pointer; border-radius:50%;
+  transition:opacity .2s, transform .15s;
 }
-.cc-user-menu{
-  display:none; position:absolute; top:48px; right:0;
-  background:var(--modal-bg); border:1.5px solid var(--line);
-  border-radius:14px; padding:8px; min-width:200px;
-  box-shadow:0 8px 32px rgba(0,0,0,.15); z-index:400;
-  animation:_fadeDown .2s cubic-bezier(.16,.8,.3,1);
-}
-.cc-user-menu.open{ display:block; }
+.cc-user-avatar-wrap:hover{ opacity:.85; transform:scale(1.05); }
 .cc-user-menu-name{
   padding:8px 12px 10px; font-size:13px; font-weight:600;
   color:var(--ink); border-bottom:1px solid var(--line); margin-bottom:6px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.cc-user-menu a, .cc-user-menu-btn{
-  display:block; width:100%; text-align:left;
-  padding:9px 12px; font-size:13.5px; font-weight:500;
-  color:var(--ink-soft); text-decoration:none;
-  border-radius:8px; border:none; background:none;
-  cursor:pointer; font-family:'Inter',sans-serif;
-  transition:background .15s, color .15s;
-}
-.cc-user-menu a:hover{ background:var(--violet-soft); color:var(--indigo); }
-.cc-user-menu-btn.danger{ color:#E0436B; }
-.cc-user-menu-btn.danger:hover{ background:#FDE3E8; color:#C0304F; }
 
 /* Hamburger */
 .cc-hamburger{
@@ -376,15 +359,10 @@ body:not(.dark) .cc-bg-star{ display:none; }
     <button class="cc-btn-login" id="cc-login-btn">Log in</button>
     <button class="cc-btn-signup" id="cc-signup-btn">Sign up</button>
 
-    <!-- User avatar + dropdown (shown when logged in) -->
-    <div class="cc-user-avatar-wrap" id="cc-user-avatar">
+    <!-- User avatar (shown when logged in) — click goes to profile -->
+    <a href="profile.html" class="cc-user-avatar-wrap" id="cc-user-avatar" title="My Profile" style="text-decoration:none;">
       <!-- filled by auth.js -->
-      <div class="cc-user-menu" id="cc-user-menu">
-        <div class="cc-user-menu-name" id="cc-user-name"></div>
-        <a href="profile.html">👤 My Profile</a>
-        <button class="cc-user-menu-btn danger" id="cc-logout-btn">↩ Log out</button>
-      </div>
-    </div>
+    </a>
   </div>
 
   <button class="cc-hamburger" id="cc-hamburger" aria-label="Open menu">
@@ -524,19 +502,6 @@ body:not(.dark) .cc-bg-star{ display:none; }
   document.getElementById('cc-signup-btn') ?.addEventListener('click', () => openAuthModal('signup'));
   document.getElementById('cc-login-btn-m')  ?.addEventListener('click', () => { closeDrawer(); openAuthModal('login'); });
   document.getElementById('cc-signup-btn-m') ?.addEventListener('click', () => { closeDrawer(); openAuthModal('signup'); });
-
-  // Logout
-  document.getElementById('cc-logout-btn')?.addEventListener('click', () => {
-    if (window.ccAuth) window.ccAuth.logout();
-    document.getElementById('cc-user-menu').classList.remove('open');
-  });
-
-  // Close user menu on outside click
-  document.addEventListener('click', e => {
-    const wrap = document.getElementById('cc-user-avatar');
-    const menu = document.getElementById('cc-user-menu');
-    if (menu && wrap && !wrap.contains(e.target)) menu.classList.remove('open');
-  });
 
   /* ── 10. Tab switcher (global) ── */
   window.ccSwitchTab = function(tab) {
