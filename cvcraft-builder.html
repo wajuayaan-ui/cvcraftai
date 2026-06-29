@@ -255,8 +255,46 @@ textarea { resize:vertical; min-height:68px; line-height:1.55; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Demo CV
     </button>
+    <div id="mh-auth-wrap" style="display:flex;align-items:center;gap:8px;">
+      <!-- Shown when logged out -->
+      <button class="demo-link" id="mh-login-btn" style="display:none;" onclick="document.querySelector('.cc-btn-login')?.click()">
+        Log in
+      </button>
+      <!-- Shown when logged in -->
+      <a href="profile.html" id="mh-profile-btn" style="display:none;align-items:center;gap:7px;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--ink-soft);text-decoration:none;transition:all .17s;"
+        onmouseover="this.style.background='var(--violet-soft)';this.style.borderColor='#C9C0F2';this.style.color='var(--indigo-deep)'"
+        onmouseout="this.style.background='#fff';this.style.borderColor='var(--line)';this.style.color='var(--ink-soft)'">
+        <span id="mh-avatar-mini" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#7C6CF0,#5B4BD6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;"></span>
+        My Profile
+      </a>
+    </div>
   </div>
 </div>
+
+<script>
+// ── Update masthead auth buttons based on login state ──
+window.__onAuthReady = function(user) {
+  window.__cvUser = user;
+  const loginBtn   = document.getElementById('mh-login-btn');
+  const profileBtn = document.getElementById('mh-profile-btn');
+  const avatarMini = document.getElementById('mh-avatar-mini');
+  if (user) {
+    if (loginBtn)   loginBtn.style.display   = 'none';
+    if (profileBtn) profileBtn.style.display = 'flex';
+    if (avatarMini) {
+      if (user.photoURL) {
+        avatarMini.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        const initials = (user.displayName || user.email || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+        avatarMini.textContent = initials;
+      }
+    }
+  } else {
+    if (loginBtn)   loginBtn.style.display   = 'flex';
+    if (profileBtn) profileBtn.style.display = 'none';
+  }
+};
+</script>
 
 <div class="app">
 <div style="display:flex;flex-direction:column;background:var(--card);border-right:1px solid var(--line);min-height:0;overflow:hidden;">
@@ -1044,6 +1082,64 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('CV import data could not be read:', e);
     }
   }
+
+  // ── Restore CV loaded from profile page ──
+  if (params.get('source') === 'profile') {
+    const savedForm = sessionStorage.getItem('cc-load-cv');
+    if (savedForm) {
+      sessionStorage.removeItem('cc-load-cv');
+      try {
+        restoreFormData(savedForm);
+      } catch (e) {
+        console.warn('Profile CV restore failed:', e);
+      }
+    }
+
+    // Also re-render previously generated CV text on the right panel
+    const savedGenerated = sessionStorage.getItem('cc-load-cv-generated');
+    if (savedGenerated) {
+      sessionStorage.removeItem('cc-load-cv-generated');
+      try {
+        const sections = parseSections(savedGenerated);
+        window.__cvSections = sections;
+        const body = document.getElementById('cv-body');
+        body.innerHTML = '';
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('cv-content').style.display = 'block';
+        for (const k of SECTION_KEYS) {
+          if (!sections[k]) continue;
+          const sec = document.createElement('div'); sec.className = 'cv-sec';
+          const titleEl = document.createElement('div'); titleEl.className = 'cv-sec-title'; titleEl.textContent = k;
+          const bodyEl  = document.createElement('div'); bodyEl.className  = 'cv-sec-body';
+          bodyEl.innerHTML = renderSectionBody(sections[k], k);
+          sec.appendChild(titleEl); sec.appendChild(bodyEl);
+          body.appendChild(sec);
+        }
+        document.getElementById('score-tag').style.display = 'flex';
+        document.getElementById('copy-btn').disabled = false;
+        document.getElementById('dl-btn').disabled   = false;
+
+        // Rebuild CV header from restored form data
+        const v = id => (document.getElementById(id)?.value.trim() || '');
+        document.getElementById('cv-name').textContent = (v('fname') + ' ' + v('lname')).trim();
+        document.getElementById('cv-line1').textContent =
+          [v('city'), v('phone'), v('email')].filter(Boolean).join(' | ') +
+          (v('dob') ? ' | DOB: ' + v('dob') : '');
+        document.getElementById('cv-line2').textContent =
+          [v('nationality') ? 'Nationality: ' + v('nationality') : '',
+           v('iqama') ? 'Iqama: ' + v('iqama') + (v('iqama-status') ? ' (' + v('iqama-status') + ')' : '') : '']
+          .filter(Boolean).join(' | ');
+        document.getElementById('cv-line3').textContent =
+          [v('linkedin') ? 'LinkedIn: ' + v('linkedin') : '',
+           v('github')   ? 'GitHub: '   + v('github')   : '']
+          .filter(Boolean).join(' | ');
+
+        setStatus('CV loaded from your account — review and regenerate.', 'ok');
+      } catch (e) {
+        console.warn('Could not restore generated CV:', e);
+      }
+    }
+  }
 });
 
 // ── Generation animation ──
@@ -1080,13 +1176,113 @@ function stopGenAnimation() {
   document.getElementById('gen-overlay').classList.remove('visible');
 }
 
-// ── GENERATE ──
-  // Restore CV loaded from profile page
-const loadedCV = sessionStorage.getItem('cc-load-cv');
-if (loadedCV && location.search.includes('source=profile')) {
-  sessionStorage.removeItem('cc-load-cv');
-  // restoreFormData is built next
+// ── Restore CV form data loaded from profile page ──
+function restoreFormData(data) {
+  try {
+    const d = typeof data === 'string' ? JSON.parse(data) : data;
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+
+    // Basic fields
+    set('fname',        d.fname);
+    set('lname',        d.lname);
+    set('phone',        d.phone);
+    set('email',        d.email);
+    set('city',         d.city);
+    set('linkedin',     d.linkedin);
+    set('github',       d.github);
+    set('dob',          d.dob);
+    set('nationality',  d.nationality);
+    set('iqama',        d.iqama);
+    set('iqama-status', d.iqamaStatus);
+    set('target-role',  d.targetRole);
+    set('achievements', d.achievements);
+    set('softskills',   d.softskills);
+    set('coursework',   d.coursework);
+    set('other-title',  d.otherTitle);
+    set('other-body',   d.otherBody);
+
+    // Sector
+    if (d.sector) {
+      const sel = document.getElementById('sector');
+      if (sel) { sel.value = d.sector; updateChips(); }
+    }
+
+    // Region
+    if (d.region) {
+      region = d.region;
+      document.querySelectorAll('.region-card').forEach(c => {
+        c.classList.toggle('on', c.dataset.region === d.region || c.title === (REGIONS.find(r=>r.id===d.region)?.instr));
+      });
+      // re-set by matching id via onclick simulation
+      document.querySelectorAll('#region-row .region-card').forEach((c, i) => {
+        const r = REGIONS[i];
+        if (r && r.id === d.region) {
+          document.querySelectorAll('#region-row .region-card').forEach(x => x.classList.remove('on'));
+          c.classList.add('on');
+          document.getElementById('ksa-fields').style.display = (d.region === 'gulf') ? 'block' : 'none';
+        }
+      });
+    }
+
+    // Chip skills
+    if (d.chipSkills?.length) {
+      document.querySelectorAll('.chip').forEach(chip => {
+        chip.classList.toggle('on', d.chipSkills.includes(chip.textContent.trim()));
+      });
+    }
+
+    // Skill categories
+    if (d.skillCats?.length) {
+      document.getElementById('skill-cat-list').innerHTML = '';
+      skillCatN = 0;
+      d.skillCats.forEach(sc => addSkillCat(sc.cat || '', sc.val || ''));
+    }
+
+    // Jobs
+    if (d.jobs?.length) {
+      document.getElementById('job-list').innerHTML = '';
+      jobN = 0;
+      d.jobs.forEach(j => addJob(j.title||'', j.company||'', j.loc||'', j.dates||'', j.type||'', j.notes||''));
+    }
+
+    // Projects
+    if (d.projects?.length) {
+      document.getElementById('project-list').innerHTML = '';
+      projN = 0;
+      d.projects.forEach(p => addProject(p.name||'', p.tools||'', p.desc||''));
+    }
+
+    // Education
+    if (d.edus?.length) {
+      document.getElementById('edu-list').innerHTML = '';
+      eduN = 0;
+      d.edus.forEach(e => addEdu(e.deg||'', e.inst||'', e.loc||'', e.dates||''));
+    }
+
+    // Certs
+    if (d.certs?.length) {
+      document.getElementById('cert-list').innerHTML = '';
+      certN = 0;
+      d.certs.forEach(c => addCert(c.name||'', c.issuer||'', c.date||''));
+    }
+
+    // Languages
+    if (d.langs?.length) {
+      document.getElementById('lang-list').innerHTML = '';
+      langN = 0;
+      d.langs.forEach(l => addLang(l.lang||'', l.level||''));
+    }
+
+    updateProgress();
+    setStatus('CV loaded from your account — review and regenerate.', 'ok');
+
+  } catch (e) {
+    console.error('restoreFormData error:', e);
+    setStatus('Could not restore CV data.', 'err');
+  }
 }
+
+// ── GENERATE ──
 async function generate() {
   const fname = document.getElementById('fname').value.trim();
   if (!fname) { setStatus('Please enter your name first.', 'err'); return; }
