@@ -425,6 +425,30 @@ body:not(.dark) .cc-bg-star{ display:none; }
     document.body.prepend(wrapper);
   }
 
+  /* ── 5b. Apply cached auth state immediately (prevents login/signup flash) ──
+     auth.js still does the real Firebase check and is the source of truth —
+     this just paints the *correct* state on first render instead of always
+     defaulting to "logged out", so there's nothing to flash between page loads. */
+  try {
+    const cached = JSON.parse(localStorage.getItem('cvcraft-auth-cache') || 'null');
+    if (cached && cached.loggedIn) {
+      ['cc-login-btn', 'cc-signup-btn', 'cc-login-btn-m', 'cc-signup-btn-m'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      const avatarWrap = document.getElementById('cc-user-avatar');
+      if (avatarWrap) {
+        avatarWrap.style.display = 'flex';
+        if (cached.photo) {
+          avatarWrap.innerHTML = `<img src="${cached.photo}" alt="${cached.name || 'User'}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;">`;
+        } else {
+          const initial = (cached.name || 'U').trim().charAt(0).toUpperCase();
+          avatarWrap.innerHTML = `<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7C6CF0,var(--indigo-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;">${initial}</div>`;
+        }
+      }
+    }
+  } catch (e) { /* ignore bad cache */ }
+
   /* ── 6. Dark mode ── */
   let isDark = localStorage.getItem('cvcraft-dark') === '1';
   function applyTheme(dark) {
