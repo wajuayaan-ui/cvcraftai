@@ -61,6 +61,7 @@ function _initAuth() {
     async logout() {
       await auth.signOut();
       localStorage.removeItem('cc-current-cv-id');
+      localStorage.removeItem('cvcraft-auth-cache');
     },
 
     async getToken() {
@@ -119,6 +120,15 @@ function _updateNav(user) {
   if (user) {
     loginBtns.forEach(b  => b.style.display = 'none');
     signupBtns.forEach(b => b.style.display = 'none');
+
+    try {
+      localStorage.setItem('cvcraft-auth-cache', JSON.stringify({
+        loggedIn: true,
+        name: user.displayName || user.email,
+        photo: user.photoURL || null
+      }));
+    } catch (e) { /* ignore storage errors (private mode, etc) */ }
+
     if (avatarWrap) {
       const initials = (user.displayName || user.email || '?')
         .split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -149,6 +159,7 @@ function _updateNav(user) {
     loginBtns.forEach(b  => b.style.display = '');
     signupBtns.forEach(b => b.style.display = '');
     if (avatarWrap) avatarWrap.style.display = 'none';
+    try { localStorage.removeItem('cvcraft-auth-cache'); } catch (e) { /* ignore */ }
   }
 }
 
