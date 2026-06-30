@@ -57,15 +57,28 @@ body{
   backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
   position:sticky; top:0; z-index:200;
   animation:_fadeDown .6s cubic-bezier(.16,.8,.3,1) both;
-  transition:background .4s, border-color .4s;
+  transition:background .4s, border-color .4s, padding .35s cubic-bezier(.16,.8,.3,1), box-shadow .35s cubic-bezier(.16,.8,.3,1);
+  box-shadow:0 0 0 rgba(8,8,18,0);
+}
+.cc-nav.cc-scrolled{
+  padding:11px 48px;
+  box-shadow:0 8px 28px -8px rgba(8,8,18,.16);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
 }
 .cc-brand{ display:flex; align-items:center; cursor:pointer; }
 .cc-brand-logo{
   height:42px; width:auto; display:block;
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .2s, filter .4s;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .2s, filter .4s, height .35s cubic-bezier(.16,.8,.3,1);
 }
+.cc-nav.cc-scrolled .cc-brand-logo{ height:34px; }
 .cc-brand:hover .cc-brand-logo{ transform:scale(1.04); opacity:.9; }
 body.dark .cc-brand-logo{ filter:invert(1) brightness(2); }
+@keyframes _brandPulse{
+  0%{ transform:scale(1); }
+  35%{ transform:scale(.9); }
+  100%{ transform:scale(1); }
+}
+.cc-brand.cc-brand-pulse .cc-brand-logo{ animation:_brandPulse .45s cubic-bezier(.34,1.56,.64,1); }
 
 .cc-nav-links{ display:flex; align-items:center; gap:34px; }
 .cc-nav-links a{
@@ -294,6 +307,8 @@ body:not(.dark) .cc-bg-star{ display:none; }
 @media(max-width:540px){
   .cc-nav{ padding:13px 16px; }
   .cc-brand-logo{ height:34px; }
+  .cc-nav.cc-scrolled{ padding:9px 16px; }
+  .cc-nav.cc-scrolled .cc-brand-logo{ height:28px; }
   .cc-auth-box{ padding:28px 20px; }
 }
   `;
@@ -424,30 +439,6 @@ body:not(.dark) .cc-bg-star{ display:none; }
     wrapper.innerHTML = navHTML;
     document.body.prepend(wrapper);
   }
-
-  /* ── 5b. Apply cached auth state immediately (prevents login/signup flash) ──
-     auth.js still does the real Firebase check and is the source of truth —
-     this just paints the *correct* state on first render instead of always
-     defaulting to "logged out", so there's nothing to flash between page loads. */
-  try {
-    const cached = JSON.parse(localStorage.getItem('cvcraft-auth-cache') || 'null');
-    if (cached && cached.loggedIn) {
-      ['cc-login-btn', 'cc-signup-btn', 'cc-login-btn-m', 'cc-signup-btn-m'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-      const avatarWrap = document.getElementById('cc-user-avatar');
-      if (avatarWrap) {
-        avatarWrap.style.display = 'flex';
-        if (cached.photo) {
-          avatarWrap.innerHTML = `<img src="${cached.photo}" alt="${cached.name || 'User'}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;">`;
-        } else {
-          const initial = (cached.name || 'U').trim().charAt(0).toUpperCase();
-          avatarWrap.innerHTML = `<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7C6CF0,var(--indigo-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;font-family:'Inter',sans-serif;">${initial}</div>`;
-        }
-      }
-    }
-  } catch (e) { /* ignore bad cache */ }
 
   /* ── 6. Dark mode ── */
   let isDark = localStorage.getItem('cvcraft-dark') === '1';
@@ -586,5 +577,38 @@ body:not(.dark) .cc-bg-star{ display:none; }
 
   /* ── Reveal body ── */
   document.body.style.visibility = 'visible';
+
+  /* ── 12. Shrink header on scroll ── */
+  const navEl = document.querySelector('.cc-nav');
+  if (navEl) {
+    const SCROLL_THRESHOLD = 40;
+    let ticking = false;
+    function updateNavState() {
+      navEl.classList.toggle('cc-scrolled', window.scrollY > SCROLL_THRESHOLD);
+      ticking = false;
+    }
+    updateNavState();
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(updateNavState);
+        ticking = true;
+      }
+    }, { passive: true });
+  }
+
+  /* ── 13. Logo click — scroll to top on the same page, navigate otherwise ── */
+  const brandEl = document.querySelector('.cc-brand');
+  if (brandEl) {
+    brandEl.addEventListener('click', (e) => {
+      const onHome = page === 'index.html' || page === '';
+      if (onHome) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        brandEl.classList.add('cc-brand-pulse');
+        setTimeout(() => brandEl.classList.remove('cc-brand-pulse'), 500);
+      }
+      // otherwise let the link navigate normally to index.html
+    });
+  }
 
 })();
